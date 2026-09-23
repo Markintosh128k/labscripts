@@ -30,6 +30,8 @@ Lo script accetta i file di dati come argomenti da riga di comando.
 
 ### Un solo dataset
 
+(Non ancora implementato)
+
 ```bash
 python3 main.py dati.xlsx
 ```
