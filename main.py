@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np  # noqa: I001
 import sys
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         ecolor="blue",
         capsize=2,
         elinewidth=0.8,
-        markersize=5,
+        markersize=2,
         alpha=0.85,
         label="Dati (conf. a monte)",
     )
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         ecolor="red",
         capsize=2,
         elinewidth=0.8,
-        markersize=5,
+        markersize=2,
         alpha=0.85,
         label="Dati (conf. a valle)",
     )
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         ecolor="blue",
         capsize=2,
         elinewidth=0.8,
-        markersize=5,
+        markersize=2,
         alpha=0.85,
         label="Dati (conf. a monte)",
     )
@@ -198,7 +198,7 @@ if __name__ == "__main__":
         ecolor="red",
         capsize=2,
         elinewidth=0.8,
-        markersize=5,
+        markersize=2,
         alpha=0.85,
         label="Dati (conf. a valle)",
     )
