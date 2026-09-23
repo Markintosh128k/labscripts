@@ -42,9 +42,16 @@ def parametriFitODR(x, y, dx, dy, stima_iniziale=(1.0, 0.0)):
     risultato = odr.run()
 
     m, q = risultato.beta
-    dm, dq = risultato.sd_beta
+    dm, dq = np.sqrt(np.diag(risultato.cov_beta))
 
     return m, q, dm, dq
+
+
+def consistenzaStatistica(a, b, da, db, k):
+    discrepanza = abs(a - b)
+    sigma_d = np.sqrt(da**2 + db**2)
+
+    return discrepanza <= k * sigma_d
 
 
 if __name__ == "__main__":
@@ -52,21 +59,45 @@ if __name__ == "__main__":
     xm, ym, dxm, dym, nomi = getData(sys.argv[1])
     # Configurazione a valle
     xv, yv, dxv, dyv, nomi = getData(sys.argv[2])
+    k = 2
 
     nomi = [pulisci(n) for n in nomi]
     print(f"Caricati {len(xm)} punti da {sys.argv[1]}")
     print(f"Caricati {len(xv)} punti da {sys.argv[2]}")
 
+    rA, rV = 0.588, 40.0
     mm, qm, dmm, dqm = parametriFitODR(xm, ym, dxm, dym)
-    print("Parametri nella configurazione a monte:")
-    print(f"m: {mm} dm: {dmm}")
-    print(f"q: {qm} dq: {dqm}")
-
     mv, qv, dmv, dqv = parametriFitODR(xv, yv, dxv, dyv)
-    print("Parametri nella configurazione a valle:")
-    print(f"m: {mv} dm: {dmv}")
-    print(f"q: {qv} dq: {dqv}")
 
+    Rx_v, dRx_v = mv - rA, dmv
+    Rx_m, dRx_m = (mm * rV) / (rV - mm), rV**2 / (rV - mm) ** 2 * dmm
+    t = abs(Rx_v - Rx_m) / np.hypot(dRx_v, dRx_m)
+    w = np.array([1 / dRx_v**2, 1 / dRx_m**2])
+    Rx = (w[0] * Rx_v + w[1] * Rx_m) / w.sum()
+    dRx = 1 / np.sqrt(w.sum())
+
+    z = abs(Rx_v - Rx_m) / np.sqrt(dRx_v**2 + dRx_m**2)
+
+    print("=========================================")
+    print("Configurazione a monte:")
+    print(f"A' = {mm:.3f} \u00b1 {dmm:.3f} k\u03a9")
+    print(f"B' = {qm:.4f} \u00b1 {dqm:.4f} V")
+    print(f"Rx = {Rx_m:.3f} \u00b1 {dRx_m:.3f} k\u03a9")
+    print("=========================================")
+    print("Configurazione a valle:")
+    print(f"A  = {mv:.3f} \u00b1 {dmv:.3f} k\u03a9")
+    print(f"B  = {qv:.4f} \u00b1 {dqv:.4f} V")
+    print(f"Rx = {Rx_v:.3f} \u00b1 {dRx_v:.3f} k\u03a9")
+    print("=========================================")
+    print(f"Discrepanza: {z:.2f} sigma")
+    if consistenzaStatistica(Rx_v, Rx_m, dRx_v, dRx_m, k):
+        print(f"Le stime risultano compatibili entro {k} sigma")
+        print(f"Media pesata: Rx = {Rx:.3f} \u00b1 {dRx:.3f} k\u03a9")
+    else:
+        print(
+            f"Le stime NON risultano compatibili entro {k} sigma: media pesata non significativa"
+        )
+    print("=========================================")
     chi2m = chiQuadroLinare(xm, ym, mm, qm, dxm, dym)
     gdlm = xm.size - 2
     print(f"chi2 monte: {chi2m:.3f}  chi2/gdl: {chi2m / gdlm:.3f}")
@@ -119,5 +150,3 @@ if __name__ == "__main__":
     ax.grid(True, alpha=0.3)
     ax.legend()
     plt.show()
-
-    print("Grafico creato.")
