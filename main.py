@@ -106,6 +106,13 @@ if __name__ == "__main__":
     gdlv = xv.size - 2
     print(f"chi2 valle: {chi2v:.3f}  chi2/gdl: {chi2v / gdlv:.3f}")
 
+    # Curve di fit (calcolate una volta, riusate nei tre grafici)
+    x_fit_m = np.linspace(xm.min(), xm.max(), 200)
+    y_fit_m = retta((mm, qm), x_fit_m)
+    x_fit_v = np.linspace(xv.min(), xv.max(), 200)
+    y_fit_v = retta((mv, qv), x_fit_v)
+
+    # ===== Grafico 1: monte e valle insieme =====
     fig, ax = plt.subplots(figsize=(8, 6))
 
     ax.errorbar(
@@ -122,8 +129,6 @@ if __name__ == "__main__":
         alpha=0.85,
         label="Dati (conf. a monte)",
     )
-    x_fit_m = np.linspace(xm.min(), xm.max(), 200)
-    y_fit_m = retta((mm, qm), x_fit_m)
     ax.plot(x_fit_m, y_fit_m, "-", color="blue", linewidth=1.5)
 
     ax.errorbar(
@@ -140,8 +145,6 @@ if __name__ == "__main__":
         alpha=0.85,
         label="Dati (conf. a valle)",
     )
-    x_fit_v = np.linspace(xv.min(), xv.max(), 200)
-    y_fit_v = retta((mv, qv), x_fit_v)
     ax.plot(x_fit_v, y_fit_v, "-", color="red", linewidth=1.5)
 
     ax.set_xlabel(nomi[0])
@@ -149,4 +152,69 @@ if __name__ == "__main__":
     ax.set_title("Stima di R col metodo voltamperometrico")
     ax.grid(True, alpha=0.3)
     ax.legend()
+
+    # ===== Grafico 2: solo configurazione a monte =====
+    fig_m, ax_m = plt.subplots(figsize=(8, 6))
+
+    ax_m.errorbar(
+        xm,
+        ym,
+        xerr=dxm,
+        yerr=dym,
+        fmt="o",
+        color="blue",
+        ecolor="blue",
+        capsize=2,
+        elinewidth=0.8,
+        markersize=5,
+        alpha=0.85,
+        label="Dati (conf. a monte)",
+    )
+    ax_m.plot(
+        x_fit_m,
+        y_fit_m,
+        "-",
+        color="blue",
+        linewidth=1.5,
+        label=f"Fit: A' = {mm:.3f} \u00b1 {dmm:.3f} k\u03a9",
+    )
+
+    ax_m.set_xlabel(nomi[0])
+    ax_m.set_ylabel(nomi[1])
+    ax_m.set_title("Configurazione a monte")
+    ax_m.grid(True, alpha=0.3)
+    ax_m.legend()
+
+    # ===== Grafico 3: solo configurazione a valle =====
+    fig_v, ax_v = plt.subplots(figsize=(8, 6))
+
+    ax_v.errorbar(
+        xv,
+        yv,
+        xerr=dxv,
+        yerr=dyv,
+        fmt="o",
+        color="red",
+        ecolor="red",
+        capsize=2,
+        elinewidth=0.8,
+        markersize=5,
+        alpha=0.85,
+        label="Dati (conf. a valle)",
+    )
+    ax_v.plot(
+        x_fit_v,
+        y_fit_v,
+        "-",
+        color="red",
+        linewidth=1.5,
+        label=f"Fit: A = {mv:.3f} \u00b1 {dmv:.3f} k\u03a9",
+    )
+
+    ax_v.set_xlabel(nomi[0])
+    ax_v.set_ylabel(nomi[1])
+    ax_v.set_title("Configurazione a valle")
+    ax_v.grid(True, alpha=0.3)
+    ax_v.legend()
+
     plt.show()
